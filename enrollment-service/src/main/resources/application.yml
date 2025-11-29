@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: enrollment-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/enrollment_db
+    username: enrollment_user
+    password: enrollment_pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+# 服务地址配置
+user-service:
+  url: http://localhost:8081
+catalog-service:
+  url: http://localhost:8082
+
+logging:
+  level:
+    com.zjgsu.lyy.enrollment: INFO
