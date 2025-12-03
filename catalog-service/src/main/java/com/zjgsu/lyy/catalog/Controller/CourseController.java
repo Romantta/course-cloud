@@ -1,9 +1,10 @@
-package com.zjgsu.lyy.catalog.controller;
+package com.zjgsu.lyy.catalog.Controller;
 
 import com.zjgsu.lyy.catalog.model.ApiResponse;
 import com.zjgsu.lyy.catalog.model.Course;
 import com.zjgsu.lyy.catalog.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ import java.util.Map;
 public class CourseController {
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private Environment env;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Course>>> getAllCourses() {
@@ -88,5 +92,12 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.error(404, e.getMessage()));
         }
+    }
+    //负载均衡
+    @GetMapping("/ping")
+    public ResponseEntity<ApiResponse<String>> ping() {
+        String port = env.getProperty("local.server.port");
+        String message = "catalog-service is running on port: " + port;
+        return ResponseEntity.ok(ApiResponse.success(message, "Port: " + port));
     }
 }

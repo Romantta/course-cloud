@@ -4,10 +4,13 @@ import com.zjgsu.lyy.enrollment.model.ApiResponse;
 import com.zjgsu.lyy.enrollment.model.Enrollment;
 import com.zjgsu.lyy.enrollment.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +20,14 @@ public class EnrollmentController {
 
     @Autowired
     private EnrollmentService enrollmentService;
+
+    // 用于进行服务间调用（必须由@LoadBalanced标注的RestTemplate）
+    @Autowired
+    private RestTemplate restTemplate;
+
+    // 用于获取本服务端口
+    @Autowired
+    private Environment env;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Enrollment>>> getAllEnrollments() {
@@ -75,5 +86,35 @@ public class EnrollmentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.error(404, e.getMessage()));
         }
+    }
+
+    //负载均衡
+    @GetMapping("/test")
+    public ResponseEntity<ApiResponse<Map<String, String>>> testLoadBalancer() {
+        Map<String, String> results = new HashMap<>();
+
+        // 调用 user-service
+        try {
+            String userServiceUrl = "http://user-service/api/students/ping";
+            String userResponse = restTemplate.getForObject(userServiceUrl, String.class);
+            results.put("userService", userResponse != null ? userResponse : "响应为空");
+        } catch (Exception e) {
+            results.put("userService", "调用失败: " + e.getMessage());
+        }
+
+        // 调用 catalog-service
+        try {
+            String catalogServiceUrl = "http://catalog-service/api/courses/ping";
+            String catalogResponse = restTemplate.getForObject(catalogServiceUrl, String.class);
+            results.put("catalogService", catalogResponse != null ? catalogResponse : "响应为空");
+        } catch (Exception e) {
+            results.put("catalogService", "调用失败: " + e.getMessage());
+        }
+
+        // 获取 enrollment-service 自身的端口信息
+        String selfPort = env.getProperty("local.server.port", "未知");
+        results.put("enrollmentService", "enrollment-service 自身端口: " + selfPort);
+
+        return ResponseEntity.ok(ApiResponse.success("负载均衡测试结果", results));
     }
 }

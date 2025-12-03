@@ -4,6 +4,7 @@ import com.zjgsu.lyy.user_service.model.ApiResponse;
 import com.zjgsu.lyy.user_service.model.Student;
 import com.zjgsu.lyy.user_service.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private Environment env;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Student>>> getAllStudents() {
@@ -79,5 +83,12 @@ public class StudentController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(400, e.getMessage()));
         }
+    }
+    //负载均衡
+    @GetMapping("/ping")
+    public ResponseEntity<ApiResponse<String>> ping() {
+        String port = env.getProperty("local.server.port");
+        String message = "user-service is running on port: " + port;
+        return ResponseEntity.ok(ApiResponse.success(message, "Port: " + port));
     }
 }

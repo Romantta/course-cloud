@@ -1,17 +1,28 @@
 spring:
+  config:
+    activate:
+      on-profile: docker
   datasource:
-    url: jdbc:mysql://enrollment-db:3306/enrollment_db
+    url: jdbc:mysql://enrollment-db:3306/enrollment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: enrollment_user
     password: enrollment_pass
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos:8848
+        namespace: dev
+        group: COURSE_GROUP
+        username: nacos
+        password: nacos
 
-user-service:
-  url: http://user-service:8081
-catalog-service:
-  url: http://catalog-service:8082
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:

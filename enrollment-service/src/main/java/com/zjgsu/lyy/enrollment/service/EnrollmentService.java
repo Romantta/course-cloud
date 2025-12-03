@@ -4,7 +4,6 @@ import com.zjgsu.lyy.enrollment.model.Enrollment;
 import com.zjgsu.lyy.enrollment.model.EnrollmentStatus;
 import com.zjgsu.lyy.enrollment.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -24,19 +23,13 @@ public class EnrollmentService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${user-service.url}")
-    private String userServiceUrl;
-
-    @Value("${catalog-service.url}")
-    private String catalogServiceUrl;
-
     public List<Enrollment> getAllEnrollments() {
         return enrollmentRepository.findAll();
     }
 
     public Enrollment enrollStudent(String courseId, String studentId) {
-        // 1. 调用用户服务验证学生是否存在
-        String userUrl = userServiceUrl + "/api/students/studentId/" + studentId;
+        // 1. 使用服务名调用用户服务验证学生是否存在
+        String userUrl = "http://user-service/api/students/studentId/" + studentId;
         Map<String, Object> studentResponse;
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(userUrl, Map.class);
@@ -47,8 +40,8 @@ public class EnrollmentService {
             throw new RuntimeException("调用用户服务失败: " + e.getMessage());
         }
 
-        // 2. 调用课程目录服务验证课程是否存在
-        String catalogUrl = catalogServiceUrl + "/api/courses/" + courseId;
+        // 2. 使用服务名调用课程目录服务验证课程是否存在
+        String catalogUrl = "http://catalog-service/api/courses/" + courseId;
         Map<String, Object> courseResponse;
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(catalogUrl, Map.class);
@@ -92,7 +85,7 @@ public class EnrollmentService {
     }
 
     private void updateCourseEnrolledCount(String courseId, int newCount) {
-        String url = catalogServiceUrl + "/api/courses/" + courseId + "/enrollment";
+        String url = "http://catalog-service/api/courses/" + courseId + "/enrollment";
         Map<String, Object> updateData = Map.of("enrolled", newCount);
         try {
             restTemplate.put(url, updateData);
@@ -117,7 +110,7 @@ public class EnrollmentService {
     }
 
     private int getCurrentEnrolledCount(String courseId) {
-        String url = catalogServiceUrl + "/api/courses/" + courseId;
+        String url = "http://catalog-service/api/courses/" + courseId;
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
             Map<String, Object> courseResponse = response.getBody();
@@ -133,7 +126,7 @@ public class EnrollmentService {
 
     public List<Enrollment> getEnrollmentsByCourseId(String courseId) {
         // 验证课程存在
-        String url = catalogServiceUrl + "/api/courses/" + courseId;
+        String url = "http://catalog-service/api/courses/" + courseId;
         try {
             restTemplate.getForEntity(url, Map.class);
         } catch (HttpClientErrorException.NotFound e) {
@@ -145,7 +138,7 @@ public class EnrollmentService {
 
     public List<Enrollment> getEnrollmentsByStudentId(String studentId) {
         // 验证学生存在
-        String userUrl = userServiceUrl + "/api/students/studentId/" + studentId;
+        String userUrl = "http://user-service/api/students/studentId/" + studentId;
         try {
             restTemplate.getForEntity(userUrl, Map.class);
         } catch (HttpClientErrorException.NotFound e) {

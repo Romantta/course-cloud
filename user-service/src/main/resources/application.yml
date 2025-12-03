@@ -1,11 +1,22 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
     name: user-service
+  profiles:
+    active: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: dev
+        group: COURSE_GROUP
+        ephemeral: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
   datasource:
-    url: jdbc:mysql://localhost:3306/user_db
+    url: jdbc:mysql://localhost:3306/user_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: user_user
     password: user_pass
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,6 +28,15 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:

@@ -1,11 +1,22 @@
 server:
-  port: 8083
+  port: 8082
 
 spring:
   application:
     name: enrollment-service
+  profiles:
+    active: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: dev
+        group: COURSE_GROUP
+        ephemeral: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
   datasource:
-    url: jdbc:mysql://localhost:3306/enrollment_db
+    url: jdbc:mysql://localhost:3306/enrollment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: enrollment_user
     password: enrollment_pass
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -18,11 +29,22 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-# 服务地址配置
-user-service:
-  url: http://localhost:8081
-catalog-service:
-  url: http://localhost:8082
+catalog:
+  service:
+    name: catalog-service
+
+user:
+  service:
+    name: user-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
