@@ -16,13 +16,6 @@ services:
     container_name: nacos
     environment:
       - MODE=standalone
-      - NACOS_AUTH_ENABLE=true
-      - NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=
-      - NACOS_AUTH_IDENTITY_KEY=serverIdentity
-      - NACOS_AUTH_IDENTITY_VALUE=dev
-      - JVM_XMS=256m
-      - JVM_XMX=256m
-      - JVM_XMN=128m
     ports:
       - "8848:8848"
       - "9848:9848"
@@ -30,12 +23,6 @@ services:
       - nacos-data:/home/nacos/data
     networks:
       - course-cloud-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
     restart: unless-stopped
 
   catalog-db:
@@ -51,13 +38,8 @@ services:
     volumes:
       - catalog-data:/var/lib/mysql
     command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     networks:
       - course-cloud-network
     restart: unless-stopped
@@ -75,13 +57,8 @@ services:
     volumes:
       - enrollment-data:/var/lib/mysql
     command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     networks:
       - course-cloud-network
     restart: unless-stopped
@@ -99,69 +76,135 @@ services:
     volumes:
       - user-data:/var/lib/mysql
     command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     networks:
       - course-cloud-network
     restart: unless-stopped
 
-  catalog-service:
+  # Catalog Service 实例
+  catalog-service-1:
     build:
       context: ./catalog-service
       dockerfile: Dockerfile
-    container_name: catalog-service
+    container_name: catalog-service-1
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_NACOS_DISCOVERY_FAIL_FAST: "true"
-      SPRING_CLOUD_NACOS_DISCOVERY_WATCH_DELAY: "10000"
+      SERVER_PORT: 8081
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
     ports:
       - "8081:8081"
-    depends_on:
-      nacos:
-        condition: service_healthy
-      catalog-db:
-        condition: service_healthy
     networks:
       - course-cloud-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+    depends_on:
+      - nacos
+      - catalog-db
     restart: unless-stopped
 
-  user-service:
+  catalog-service-2:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    container_name: catalog-service-2
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8081
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
+    ports:
+      - "8086:8081"
+    networks:
+      - course-cloud-network
+    depends_on:
+      - nacos
+      - catalog-db
+    restart: unless-stopped
+
+  catalog-service-3:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    container_name: catalog-service-3
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8081
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
+    ports:
+      - "8087:8081"
+    networks:
+      - course-cloud-network
+    depends_on:
+      - nacos
+      - catalog-db
+    restart: unless-stopped
+
+  # User Service 实例
+  user-service-1:
     build:
       context: ./user-service
       dockerfile: Dockerfile
-    container_name: user-service
+    container_name: user-service-1
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_NACOS_DISCOVERY_FAIL_FAST: "true"
-      SPRING_CLOUD_NACOS_DISCOVERY_WATCH_DELAY: "10000"
+      SERVER_PORT: 8083
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
     ports:
       - "8083:8083"
-    depends_on:
-      nacos:
-        condition: service_healthy
-      user-db:
-        condition: service_healthy
     networks:
       - course-cloud-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+    depends_on:
+      - nacos
+      - user-db
     restart: unless-stopped
 
+  user-service-2:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service-2
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8083
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
+    ports:
+      - "8084:8083"
+    networks:
+      - course-cloud-network
+    depends_on:
+      - nacos
+      - user-db
+    restart: unless-stopped
+
+  user-service-3:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service-3
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8083
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
+    ports:
+      - "8085:8083"
+    networks:
+      - course-cloud-network
+    depends_on:
+      - nacos
+      - user-db
+    restart: unless-stopped
+
+  # Enrollment Service
   enrollment-service:
     build:
       context: ./enrollment-service
@@ -169,25 +212,15 @@ services:
     container_name: enrollment-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_NACOS_DISCOVERY_FAIL_FAST: "true"
-      SPRING_CLOUD_NACOS_DISCOVERY_WATCH_DELAY: "10000"
+      SERVER_PORT: 8082
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: public
+      SPRING_CLOUD_NACOS_DISCOVERY_GROUP: DEFAULT_GROUP
     ports:
       - "8082:8082"
-    depends_on:
-      nacos:
-        condition: service_healthy
-      enrollment-db:
-        condition: service_healthy
-      catalog-service:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
     networks:
       - course-cloud-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
+    depends_on:
+      - nacos
+      - enrollment-db
     restart: unless-stopped

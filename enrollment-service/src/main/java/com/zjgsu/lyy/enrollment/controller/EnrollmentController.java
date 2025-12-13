@@ -14,8 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import com.zjgsu.lyy.enrollment.client.UserClient;
+import com.zjgsu.lyy.enrollment.client.CatalogClient;
+
 @RestController
 @RequestMapping("/api/enrollments")
+@Slf4j
 public class EnrollmentController {
 
     @Autowired
@@ -24,6 +30,12 @@ public class EnrollmentController {
     // 用于进行服务间调用（必须由@LoadBalanced标注的RestTemplate）
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private UserClient userClient;
+
+    @Autowired
+    private CatalogClient catalogClient;
 
     // 用于获取本服务端口
     @Autowired
@@ -90,30 +102,32 @@ public class EnrollmentController {
 
     //负载均衡
     @GetMapping("/test")
-    public ResponseEntity<ApiResponse<Map<String, String>>> testLoadBalancer() {
+    public ResponseEntity<ApiResponse<Map<String, String>>> testLoadBalancer(HttpServletRequest request) {
         Map<String, String> results = new HashMap<>();
+
+        // 获取enrollment-service自身信息
+        String selfPort = env.getProperty("local.server.port");
+        String selfHostname = System.getenv("HOSTNAME");
+        if (selfHostname == null) {
+            selfHostname = request.getLocalName();
+        }
+        results.put("enrollmentService", "Instance: " + selfHostname + ", Port: " + selfPort);
 
         // 调用 user-service
         try {
-            String userServiceUrl = "http://user-service/api/students/ping";
-            String userResponse = restTemplate.getForObject(userServiceUrl, String.class);
-            results.put("userService", userResponse != null ? userResponse : "响应为空");
+            String userResponse = userClient.ping();
+            results.put("userService", userResponse);
         } catch (Exception e) {
             results.put("userService", "调用失败: " + e.getMessage());
         }
 
         // 调用 catalog-service
         try {
-            String catalogServiceUrl = "http://catalog-service/api/courses/ping";
-            String catalogResponse = restTemplate.getForObject(catalogServiceUrl, String.class);
-            results.put("catalogService", catalogResponse != null ? catalogResponse : "响应为空");
+            String catalogResponse = catalogClient.ping();
+            results.put("catalogService", catalogResponse);
         } catch (Exception e) {
             results.put("catalogService", "调用失败: " + e.getMessage());
         }
-
-        // 获取 enrollment-service 自身的端口信息
-        String selfPort = env.getProperty("local.server.port", "未知");
-        results.put("enrollmentService", "enrollment-service 自身端口: " + selfPort);
 
         return ResponseEntity.ok(ApiResponse.success("负载均衡测试结果", results));
     }

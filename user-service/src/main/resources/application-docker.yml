@@ -10,8 +10,8 @@ spring:
     nacos:
       discovery:
         server-addr: nacos:8848
-        namespace: dev
-        group: COURSE_GROUP
+        namespace: public
+        group: DEFAULT_GROUP
         username: nacos
         password: nacos
 
@@ -27,3 +27,4 @@ management:
 logging:
   level:
     com.zjgsu.lyy.user_service: INFO
+

@@ -10,8 +10,8 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
-        namespace: dev
-        group: COURSE_GROUP
+        namespace: public
+        group: DEFAULT_GROUP
         ephemeral: true
         heart-beat-interval: 5000
         heart-beat-timeout: 15000

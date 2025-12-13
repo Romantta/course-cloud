@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/api/courses")
+@Slf4j
 public class CourseController {
     @Autowired
     private CourseService courseService;
@@ -95,9 +99,16 @@ public class CourseController {
     }
     //负载均衡
     @GetMapping("/ping")
-    public ResponseEntity<ApiResponse<String>> ping() {
+    public String ping(HttpServletRequest request) {
         String port = env.getProperty("local.server.port");
-        String message = "catalog-service is running on port: " + port;
-        return ResponseEntity.ok(ApiResponse.success(message, "Port: " + port));
+        String hostname = System.getenv("HOSTNAME");
+        if (hostname == null) {
+            hostname = request.getLocalName();
+        }
+
+        String message = "catalog-service instance: " + hostname + " on port: " + port;
+        log.info("catalog-service instance {} on port {} handling request", hostname, port);
+
+        return message; // 直接返回字符串
     }
 }

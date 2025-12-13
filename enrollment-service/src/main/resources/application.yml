@@ -10,8 +10,8 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
-        namespace: dev
-        group: COURSE_GROUP
+        namespace: public
+        group: DEFAULT_GROUP
         ephemeral: true
         heart-beat-interval: 5000
         heart-beat-timeout: 15000
@@ -49,3 +49,26 @@ management:
 logging:
   level:
     com.zjgsu.lyy.enrollment: INFO
+
+feign:
+  circuitbreaker:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 5s
+      catalog-service:
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 5s
