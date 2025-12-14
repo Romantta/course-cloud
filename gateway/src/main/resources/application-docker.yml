@@ -2,10 +2,6 @@ spring:
   config:
     activate:
       on-profile: docker
-  datasource:
-    url: jdbc:mysql://user-db:3306/user_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: user_user
-    password: user_pass
   cloud:
     nacos:
       discovery:
@@ -20,15 +16,7 @@ management:
     web:
       exposure:
         include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
 
 jwt:
   secret: "2B4B6250655368566D597133743677397A24432646294A404D635166546A576E"
   expiration: 86400000
-
-logging:
-  level:
-    com.zjgsu.lyy.user_service: INFO
-

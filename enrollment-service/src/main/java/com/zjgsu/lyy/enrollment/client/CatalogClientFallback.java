@@ -1,14 +1,16 @@
 package com.zjgsu.lyy.enrollment.client;
 
 import com.zjgsu.lyy.enrollment.dto.CourseDto;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Slf4j
 @Component
 public class CatalogClientFallback implements CatalogClient {
+
+    private static final Logger log = LoggerFactory.getLogger(CatalogClientFallback.class);
 
     @Override
     public String ping() {

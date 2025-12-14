@@ -15,13 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import com.zjgsu.lyy.enrollment.client.UserClient;
 import com.zjgsu.lyy.enrollment.client.CatalogClient;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@Slf4j
 public class EnrollmentController {
 
     @Autowired

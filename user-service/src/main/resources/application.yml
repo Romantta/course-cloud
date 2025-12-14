@@ -42,3 +42,7 @@ logging:
   level:
     com.zjgsu.lyy.user_service: INFO
     org.hibernate.SQL: DEBUG
+
+jwt:
+  secret: "2B4B6250655368566D597133743677397A24432646294A404D635166546A576E"
+  expiration: 86400000

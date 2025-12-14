@@ -3,6 +3,8 @@ package com.zjgsu.lyy.user_service.controller;
 import com.zjgsu.lyy.user_service.model.ApiResponse;
 import com.zjgsu.lyy.user_service.model.Student;
 import com.zjgsu.lyy.user_service.service.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -12,12 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/students")
-@Slf4j
 public class StudentController {
+    private static final Logger log = LoggerFactory.getLogger(StudentController.class);
 
     @Autowired
     private StudentService studentService;

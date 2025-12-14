@@ -3,6 +3,8 @@ package com.zjgsu.lyy.catalog.Controller;
 import com.zjgsu.lyy.catalog.model.ApiResponse;
 import com.zjgsu.lyy.catalog.model.Course;
 import com.zjgsu.lyy.catalog.service.CourseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -13,12 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/courses")
-@Slf4j
 public class CourseController {
+    private static final Logger log = LoggerFactory.getLogger(CourseController.class);
+
     @Autowired
     private CourseService courseService;
 
